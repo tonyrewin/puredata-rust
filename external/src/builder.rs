@@ -1,5 +1,5 @@
 use crate::atom::Atom;
-use crate::inlet::passive::FloatInlet;
+use crate::inlet::passive::{SymbolInlet, FloatInlet};
 use crate::inlet::*;
 use crate::obj::AsObject;
 use crate::outlet::{Outlet, OutletSend, OutletSignal, OutletType, SignalOutlet};
@@ -24,6 +24,10 @@ pub trait ControlExternalBuilder<T> {
     fn poster(&mut self) -> Box<dyn PdPost>;
     fn instance_name(&self) -> &Option<Symbol>;
     fn creation_args(&self) -> &[Atom];
+    fn new_passive_symbol_inlet(
+        &mut self,
+        initial_value: pd_sys::t_symbol
+    ) -> Box<dyn Deref<Target = pd_sys::t_symbol> + Send>;
     fn new_passive_float_inlet(
         &mut self,
         initial_value: pd_sys::t_float,
@@ -72,7 +76,7 @@ impl<'a, T> Builder<'a, T> {
 
 impl<'a, T> Into<IntoBuiltControl<T>> for Builder<'a, T> {
     fn into(self) -> IntoBuiltControl<T> {
-        (self.float_inlets)
+        self.float_inlets
     }
 }
 
@@ -103,6 +107,13 @@ impl<'a, T> ControlExternalBuilder<T> for Builder<'a, T> {
 
     fn creation_args(&self) -> &[Atom] {
         &self.args
+    }
+
+    fn new_passive_symbol_inlet(
+        &mut self,
+        initial_value: pd_sys::t_symbol,
+    ) -> Box<dyn Deref<Target = pd_sys::t_symbol> + Send> {
+        Box::new(SymbolInlet::new(self.obj, initial_value))
     }
 
     fn new_passive_float_inlet(

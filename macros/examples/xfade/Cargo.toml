@@ -9,8 +9,8 @@ name = "xfade_tilde"
 crate-type = ["cdylib"]
 
 [dependencies]
-pd-sys = "0.1.0"
+pd-sys = "0.1.1"
 pd-ext = { path = "../../../external" }
 pd-ext-macros = { path = "../.." }
-itertools = "0.8.0"
-num = "0.2.0"
+itertools = "0.10.3"
+num = "0.4.0"

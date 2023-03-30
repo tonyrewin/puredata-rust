@@ -48,6 +48,53 @@ pub mod passive {
             }
         }
     }
+
+    // Symbol Inlet
+
+    pub struct SymbolInlet {
+        value: Box<pd_sys::t_symbol>,
+        inlet: *mut pd_sys::_inlet,
+    }
+    
+    unsafe impl Sync for SymbolInlet {}
+    unsafe impl Send for SymbolInlet {}
+
+    impl SymbolInlet {
+        pub fn new(owner: &mut dyn AsObject, initial_value: pd_sys::t_symbol) -> Self {
+            let value = Box::new(initial_value);
+            unsafe {
+                let mut value = Box::into_raw(value);
+                let inlet = pd_sys::symbolinlet_new(owner.as_obj(), &mut value);
+                let value = Box::from_raw(value);
+                Self { inlet, value }
+            }
+        }
+    }
+
+    impl Deref for SymbolInlet {
+        type Target = pd_sys::t_symbol;
+
+        fn deref(&self) -> &pd_sys::t_symbol {
+            self.value.deref()
+        }
+    }
+
+    impl AsRef<str> for SymbolInlet {
+        fn as_ref(&self) -> &str {
+            unsafe {
+                let cstr = std::ffi::CStr::from_ptr(self.value.s_name);
+                cstr.to_str().unwrap()
+            }
+        }
+    }
+
+    impl Drop for SymbolInlet {
+        fn drop(&mut self) {
+            unsafe {
+                pd_sys::inlet_free(self.inlet);
+            }
+        }
+    }
 }
 
 impl SignalInlet {

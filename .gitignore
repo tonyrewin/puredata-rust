@@ -4,3 +4,6 @@ target/
 *.m_*
 *.o_*
 *.pd_*
+.idea
+.vscode
+.DS_Store
