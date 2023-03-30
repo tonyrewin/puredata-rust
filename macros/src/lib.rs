@@ -491,7 +491,7 @@ fn parse_and_build(items: Vec<Item>) -> syn::Result<proc_macro::TokenStream> {
         quote! {
             pub unsafe extern "C" fn #new_method_name (name: *mut pd_sys::t_symbol, argc: std::os::raw::c_int, argv: *const pd_sys::t_atom) -> *mut ::std::os::raw::c_void {
                 let args = pd_ext::atom::Atom::slice_from_raw_parts(argv, argc);
-                Wrapped::new(#class_static.expect("class not initialized"), &args, name)
+                Wrapped::new(#class_static.expect(" external class is not initialized! "), &args, name)
             }
         });
 
